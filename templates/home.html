@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for p in blogs %}
+    <div class="col-md-12">
+        <div class="postbody">
+            {{ p.render() | safe}}
+        </div>
+        <div class="permalink">read full post</div><div class="like"><i class="fa fa-thumbs-up" aria-hidden="true"></i></div>
+    </div>
+    {% endfor %}
+{% endblock %}

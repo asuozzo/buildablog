@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link type="text/css" rel="stylesheet" href="/static/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />
+    <script src="https://use.fontawesome.com/762411fe70.js"></script>
+    <title>My blog</title>
+</head>
+<body>
+    <header class="text-center"><h1><a href="/">This is my blog</a></h1>
+    <a href="/newpost">submit entry</a> | <a href="/signup">sign up</a> | <a href="/login">log in</a> | <a href="/logout">log out</a></header>
+
+    <div id="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

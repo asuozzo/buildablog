@@ -1,0 +1,21 @@
+.post-heading {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #000;
+    position: relative;
+}
+
+.post-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.post-date {
+    position:absolute;
+    right: 0px;
+    bottom: 0px;
+    color: #999;
+}
+
+.submit-post {
+    width: 100%;
+}
