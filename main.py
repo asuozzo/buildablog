@@ -111,7 +111,7 @@ class Blog(db.Model):
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p=self)
-
+           
 
 def users_key(group='default'):
     return db.Key.from_path("users", group)
