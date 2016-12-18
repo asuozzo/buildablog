@@ -155,10 +155,11 @@ class MainPage(Handler):
 
 
 class SubmitPage(Handler):
-    def render_submit(self, subject="", content="", error=""):
+    def render_submit(self, subject="", content="", error="", username=""):
 
         self.render("newpost.html", subject=subject,
-                    content=content, error=error)
+                    content=content, error=error,
+                    username=self.user.username)
 
     def get(self):
         if self.user:
@@ -180,7 +181,7 @@ class SubmitPage(Handler):
             self.redirect("/" + str(id))
         else:
             error = "Make sure to fill out both the title and post fields!"
-            self.render_submit(subject, content, error)
+            self.render_submit(subject, content, error,username=self.user.username)
 
 
 class PermalinkPage(Handler):
@@ -191,7 +192,7 @@ class PermalinkPage(Handler):
             self.error(404)
             return
 
-        self.render("blogpage.html", post=post)
+        self.render("blogpage.html", post=post, username=self.user.username)
 
     def get(self, post_id):
         self.render_post(int(post_id))
