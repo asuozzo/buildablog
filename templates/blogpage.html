@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>My Blog</title>
-    </head>
-    <body>
-        {{post.render() | safe}}
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="col-md-12">
+        <div class="postbody">
+            {{post.render() | safe}}
+        </div>
+        <div>
+            <h4>Comments go here</h4>
+        </div>
+    </div>
+{% endblock %}

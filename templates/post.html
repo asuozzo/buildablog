@@ -8,8 +8,10 @@
       {{p.created.strftime("%b %d, %Y")}}
     </div>
   </div>
+  <div class="post-author">Written by {{p.author}}</div>
 
   <div class="post-content">
     {{p._render_text | safe}}
   </div>
+  <div class="like">{{p.likes}} Likes <i class="fa fa-thumbs-up" aria-hidden="true"></i></div>
 </div>

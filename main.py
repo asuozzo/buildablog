@@ -50,20 +50,18 @@ def valid_pw_hash(name, pw, h):
         return True
 
 
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-PASS_RE = re.compile(r"^.{3,20}$")
-EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-
-
 def valid_username(username):
+    USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     return username and USER_RE.match(username)
 
 
 def valid_password(password):
+    PASS_RE = re.compile(r"^.{3,20}$")
     return password and PASS_RE.match(password)
 
 
 def valid_email(email):
+    EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
     return not email or EMAIL_RE.match(email)
 
 
@@ -111,7 +109,7 @@ class Blog(db.Model):
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p=self)
-           
+
 
 def users_key(group='default'):
     return db.Key.from_path("users", group)
@@ -162,14 +160,18 @@ class SubmitPage(Handler):
                     content=content, error=error)
 
     def get(self):
-        self.render_submit()
+        if self.user:
+            self.render_submit()
+        else:
+            self.redirect("/signup")
 
     def post(self):
         subject = self.request.get("subject")
         content = self.request.get("content")
 
         if subject and content:
-            b = Blog(subject=subject, content=content, likes=0, author="")
+            b = Blog(subject=subject, content=content,
+                     likes=0, author=self.user.username)
             b.put()
 
             id = b.key().id()
@@ -270,6 +272,7 @@ class WelcomePage(Handler):
             self.render('welcome.html', username=self.user.username)
         else:
             self.redirect("/signup")
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
