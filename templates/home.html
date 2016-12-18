@@ -6,7 +6,7 @@
         <div class="postbody">
             {{ p.render() | safe}}
         </div>
-        <div class="permalink">read full post</div><div class="like"><i class="fa fa-thumbs-up" aria-hidden="true"></i></div>
+        <div class="permalink"><a href="/{{p.key().id()}}">read full post</a></div>
     </div>
     {% endfor %}
 {% endblock %}
