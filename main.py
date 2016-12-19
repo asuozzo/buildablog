@@ -1,5 +1,6 @@
 import os
 import re
+import json
 
 import webapp2
 import jinja2
@@ -111,8 +112,6 @@ class Blog(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
     author = db.StringProperty()
-    like_count = db.IntegerProperty()
-    comment_count = db.IntegerProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -166,11 +165,6 @@ class Comment(db.Model):
         self._render_text = self.comment.replace('\n', '<br>')
         return render_str("comment.html", c=self)
 
-    # @classmethod
-    # def get_count(cls, blog):
-    #     count = Comment.all().filter("blog =", blog).get()
-    #     return count
-
 
 class Like(db.Model):
     blog = db.ReferenceProperty(Blog, collection_name="likes")
@@ -213,8 +207,7 @@ class SubmitPage(Handler):
 
         if subject and content:
             b = Blog(subject=subject, content=content,
-                     like_count=0, author=self.user.username,
-                     comment_count=0)
+                     author=self.user.username)
             b.put()
 
             id = b.key().id()
@@ -245,26 +238,23 @@ class PermalinkPage(Handler):
     def get(self, post_id):
         self.render_post(int(post_id))
 
-    def post(self, post_id):
+    def post(self):
         comment = self.request.get("comment")
+        ## GET POST ID?
+        blog = Blog.get_by_id(int(post_id))
 
         if not self.check_login(self.user):
-            error = "You must log in to post a comment."
-            post = Blog.get_by_id(int(post_id))
-            self.render("blogpage.html", post=post,
+            error = "You must be logged in to post a comment."
+            self.render("blogpage.html", post=blog,
                         username=self.check_login(self.user),
                         error=error, comment=comment)
         elif not comment:
             error = "There's no comment there!"
-            post = Blog.get_by_id(int(post_id))
-            self.render("blogpage.html", post=post,
+            self.render("blogpage.html", post=blog,
                         username=self.check_login(self.user),
                         error=error)
         else:
-            comment = self.request.get("comment")
             user = self.user.username
-            blog = Blog.by_id(int(post_id))
-
             c = Comment(blog=blog, user=user, comment=comment)
             c.put()
 
