@@ -6,6 +6,10 @@
             {{post.render() | safe}}
         </div>
         <div>
+            {{ post.likes }} <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+        </div>
+        <div>
+            {{ post.comments }} <i class="fa fa-comments" aria-hidden="true"></i>
             <h4>Comments go here</h4>
         </div>
     </div>
