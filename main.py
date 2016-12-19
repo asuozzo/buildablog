@@ -111,8 +111,8 @@ class Blog(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
     author = db.StringProperty()
-    likes = db.IntegerProperty()
-    comments = db.IntegerProperty()
+    like_count = db.IntegerProperty()
+    comment_count = db.IntegerProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -152,6 +152,18 @@ class User(db.Model):
             return u
 
 
+class Comment(db.Model):
+    blog = db.ReferenceProperty(Blog, collection_name="comments")
+    user = db.StringProperty()
+    comment = db.TextProperty()
+
+
+class Like(db.Model):
+    blog = db.ReferenceProperty(Blog, collection_name="likes")
+    user = db.StringProperty()
+    like = db.BooleanProperty()
+
+
 class MainPage(Handler):
     def render_index(self):
         blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 10")
@@ -181,8 +193,8 @@ class SubmitPage(Handler):
 
         if subject and content:
             b = Blog(subject=subject, content=content,
-                     likes=0, author=self.user.username,
-                     comments=0)
+                     like_count=0, author=self.user.username,
+                     comment_count=0)
             b.put()
 
             id = b.key().id()

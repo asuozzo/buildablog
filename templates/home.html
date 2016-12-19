@@ -7,8 +7,8 @@
             {{ p.render() | safe}}
         </div>
         <div class="social">
-            {{p.likes}} <i class="fa fa-thumbs-up" aria-hidden="true"></i>
-            {{p.comments}} <i class="fa fa-comments" aria-hidden="true"></i>
+            {{p.like_count}} <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+            {{p.comment_count}} <i class="fa fa-comments" aria-hidden="true"></i>
             <a href="/{{p.key().id()}}">read full post</a>
         </div>
     </div>
