@@ -167,7 +167,7 @@ class SubmitPage(Handler):
 
         self.render("newpost.html", subject=subject,
                     content=content, error=error,
-                    username=self.user.username)
+                    username=self.check_login(self.user))
 
     def get(self):
         if self.user:
@@ -190,7 +190,8 @@ class SubmitPage(Handler):
             self.redirect("/" + str(id))
         else:
             error = "Make sure to fill out both the title and post fields!"
-            self.render_submit(subject, content, error,username=self.user.username)
+            self.render_submit(subject, content, error,
+                               username=self.check_login(self.user))
 
 
 class PermalinkPage(Handler):
@@ -201,7 +202,8 @@ class PermalinkPage(Handler):
             self.error(404)
             return
 
-        self.render("blogpage.html", post=post, username=self.user.username)
+        self.render("blogpage.html", post=post,
+                    username=self.check_login(self.user))
 
     def get(self, post_id):
         self.render_post(int(post_id))
@@ -280,7 +282,7 @@ class LogOutPage(Handler):
 class WelcomePage(Handler):
     def get(self):
         if self.user:
-            self.render('welcome.html', username=self.user.username)
+            self.render('welcome.html', username=self.check_login(self.user))
         else:
             self.redirect("/signup")
 
