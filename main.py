@@ -105,6 +105,7 @@ class Blog(db.Model):
     last_modified = db.DateTimeProperty(auto_now=True)
     author = db.StringProperty()
     likes = db.IntegerProperty()
+    comments = db.IntegerProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -173,7 +174,8 @@ class SubmitPage(Handler):
 
         if subject and content:
             b = Blog(subject=subject, content=content,
-                     likes=0, author=self.user.username)
+                     likes=0, author=self.user.username,
+                     comments=0)
             b.put()
 
             id = b.key().id()

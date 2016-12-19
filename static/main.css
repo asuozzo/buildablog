@@ -20,6 +20,10 @@
     color: #999;
 }
 
+.postbody {
+    padding:20px 0;
+}
+
 .submit-post {
     width: 100%;
 }
