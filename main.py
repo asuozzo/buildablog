@@ -86,6 +86,13 @@ class Handler(webapp2.RequestHandler):
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
 
+    def check_login(self, user):
+        if user:
+            username = self.user.username
+        else:
+            username = None
+        return username
+
     def login(self, user):
         self.set_secure_cookie('user_id', str(user.key().id()))
 
@@ -149,7 +156,7 @@ class MainPage(Handler):
     def render_index(self):
         blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 10")
 
-        self.render("home.html", blogs=blogs, username=self.user.username)
+        self.render("home.html", blogs=blogs, username=self.check_login(self.user))
 
     def get(self):
         self.render_index()
