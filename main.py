@@ -118,6 +118,10 @@ class Blog(db.Model):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p=self)
 
+    @classmethod
+    def by_id(cls, blogid):
+        return Blog.get_by_id(blogid)
+
 
 def users_key(group='default'):
     return db.Key.from_path("users", group)
@@ -156,12 +160,28 @@ class Comment(db.Model):
     blog = db.ReferenceProperty(Blog, collection_name="comments")
     user = db.StringProperty()
     comment = db.TextProperty()
+    created = db.DateTimeProperty(auto_now_add=True)
+
+    def render(self):
+        self._render_text = self.comment.replace('\n', '<br>')
+        return render_str("comment.html", c=self)
+
+    # @classmethod
+    # def get_count(cls, blog):
+    #     count = Comment.all().filter("blog =", blog).get()
+    #     return count
 
 
 class Like(db.Model):
     blog = db.ReferenceProperty(Blog, collection_name="likes")
     user = db.StringProperty()
     like = db.BooleanProperty()
+    created = db.DateTimeProperty(auto_now_add=True)
+
+    @classmethod
+    def get_count(cls, blog):
+        count = Like.all().filter("blog =", blog).get()
+        return count
 
 
 class MainPage(Handler):
@@ -210,15 +230,45 @@ class PermalinkPage(Handler):
     def render_post(self, post_id):
         post = Blog.get_by_id(post_id)
 
+        print post.key()
+
+        comments = post.comments
+
         if not post:
             self.error(404)
             return
 
         self.render("blogpage.html", post=post,
-                    username=self.check_login(self.user))
+                    username=self.check_login(self.user),
+                    comments=comments)
 
     def get(self, post_id):
         self.render_post(int(post_id))
+
+    def post(self, post_id):
+        comment = self.request.get("comment")
+
+        if not self.check_login(self.user):
+            error = "You must log in to post a comment."
+            post = Blog.get_by_id(int(post_id))
+            self.render("blogpage.html", post=post,
+                        username=self.check_login(self.user),
+                        error=error, comment=comment)
+        elif not comment:
+            error = "There's no comment there!"
+            post = Blog.get_by_id(int(post_id))
+            self.render("blogpage.html", post=post,
+                        username=self.check_login(self.user),
+                        error=error)
+        else:
+            comment = self.request.get("comment")
+            user = self.user.username
+            blog = Blog.by_id(int(post_id))
+
+            c = Comment(blog=blog, user=user, comment=comment)
+            c.put()
+
+            self.render_post(int(post_id))
 
 
 class SignUpPage(Handler):

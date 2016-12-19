@@ -10,7 +10,15 @@
         </div>
         <div>
             {{ post.comment_count }} <i class="fa fa-comments" aria-hidden="true"></i>
-            <h4>Comments go here</h4>
+            <h4>Comments</h4>
+            <form method="post">
+                <textarea name="comment">{{comment}}</textarea>
+                <div>{{error}}</div>
+                <input type="submit">
+            </form>
+            {% for c in comments %}
+                {{ c.render() | safe}}
+            {% endfor %}
         </div>
     </div>
 {% endblock %}
