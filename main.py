@@ -238,9 +238,9 @@ class PermalinkPage(Handler):
     def get(self, post_id):
         self.render_post(int(post_id))
 
-    def post(self):
+    def post(self, post_id):
         comment = self.request.get("comment")
-        ## GET POST ID?
+
         blog = Blog.get_by_id(int(post_id))
 
         if not self.check_login(self.user):
@@ -248,7 +248,7 @@ class PermalinkPage(Handler):
             self.render("blogpage.html", post=blog,
                         username=self.check_login(self.user),
                         error=error, comment=comment)
-        elif not comment:
+        elif comment == "":
             error = "There's no comment there!"
             self.render("blogpage.html", post=blog,
                         username=self.check_login(self.user),
