@@ -1,6 +1,5 @@
 import os
 import re
-import json
 
 import webapp2
 import jinja2
@@ -171,7 +170,6 @@ class Comment(db.Model):
 class Like(db.Model):
     blog = db.ReferenceProperty(Blog, collection_name="likes")
     user = db.StringProperty()
-    like = db.BooleanProperty()
     created = db.DateTimeProperty(auto_now_add=True)
 
 
@@ -261,7 +259,7 @@ class PermalinkPage(Handler):
 
         else:
             user = self.user.username
-            l = Like(user=user, blog=blog, like=True)
+            l = Like(user=user, blog=blog)
             l.put()
             blog.likecount = blog.likes.count()
             blog.put()
