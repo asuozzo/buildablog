@@ -6,9 +6,7 @@
         <div class="postbody">
             {{ p.render() | safe}}
         </div>
-        <div class="social">
-            0 <i class="fa fa-thumbs-up" aria-hidden="true"></i>
-            {{commentcount}} <i class="fa fa-comments" aria-hidden="true"></i>
+        <div class="link">
             <a href="/{{p.key().id()}}">read full post</a>
         </div>
     </div>

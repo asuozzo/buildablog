@@ -1,5 +1,5 @@
 .post-heading {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     border-bottom: 1px solid #000;
     position: relative;
 }
@@ -9,15 +9,23 @@
     font-weight: bold;
 }
 
-.post-date {
+.post-social {
     position:absolute;
     right: 0px;
     bottom: 0px;
+}
+
+.post-date {
     color: #999;
+    margin-bottom: 15px;
 }
 
 .post-author {
     color: #999;
+}
+
+.post-content {
+    margin:10px;
 }
 
 .postbody {

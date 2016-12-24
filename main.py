@@ -177,7 +177,8 @@ class MainPage(Handler):
     def render_index(self):
         blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 10")
 
-        self.render("home.html", blogs=blogs, username=self.check_login(self.user))
+        self.render("home.html", blogs=blogs,
+                    username=self.check_login(self.user))
 
     def get(self):
         self.render_index()
