@@ -6,15 +6,18 @@
             {{post.render() | safe}}
         </div>
         <div>
-            0 <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+            {{post.likecount}} <i class="fa fa-thumbs-up" aria-hidden="true"></i>
         </div>
         <div>
-            {{commentcount}} <i class="fa fa-comments" aria-hidden="true"></i>
-            <h4>Comments</h4>
+            {{post.commentcount}} <i class="fa fa-comments" aria-hidden="true"></i>
+        </div>
+        <div>
             <form method="post">
+                <button type="submit" name="submit" value="like">Like this post</button>
+                <h4>Comments</h4>
                 <textarea name="comment">{{comment}}</textarea>
                 <div>{{error}}</div>
-                <input type="submit">
+                <button type="submit" name="submit" value="comment">Submit</button>
             </form>
             {% for c in comments %}
                 {{ c.render() | safe}}

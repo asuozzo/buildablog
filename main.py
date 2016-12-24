@@ -112,6 +112,8 @@ class Blog(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     last_modified = db.DateTimeProperty(auto_now=True)
     author = db.StringProperty()
+    commentcount = db.IntegerProperty(default=0)
+    likecount = db.IntegerProperty(default=0)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -172,11 +174,6 @@ class Like(db.Model):
     like = db.BooleanProperty()
     created = db.DateTimeProperty(auto_now_add=True)
 
-    @classmethod
-    def get_count(cls, blog):
-        count = Like.all().filter("blog =", blog).get()
-        return count
-
 
 class MainPage(Handler):
     def render_index(self):
@@ -225,40 +222,51 @@ class PermalinkPage(Handler):
 
         comments = post.comments
 
-        commentcount = comments.count()
-
         if not post:
             self.error(404)
             return
 
         self.render("blogpage.html", post=post,
                     username=self.check_login(self.user),
-                    comments=comments, commentcount=commentcount)
+                    comments=comments)
 
     def get(self, post_id):
         self.render_post(int(post_id))
 
     def post(self, post_id):
-        comment = self.request.get("comment")
-
+        button = self.request.get("submit")
         blog = Blog.get_by_id(int(post_id))
 
-        if not self.check_login(self.user):
-            error = "You must be logged in to post a comment."
-            self.render("blogpage.html", post=blog,
-                        username=self.check_login(self.user),
-                        error=error, comment=comment)
-        elif comment == "":
-            error = "There's no comment there!"
-            self.render("blogpage.html", post=blog,
-                        username=self.check_login(self.user),
-                        error=error)
+        print button
+
+        if button == "comment":
+            comment = self.request.get("comment")
+
+            if not self.check_login(self.user):
+                error = "You must be logged in to post a comment."
+                self.render("blogpage.html", post=blog,
+                            username=self.check_login(self.user),
+                            error=error, comment=comment)
+            elif comment == "":
+                error = "There's no comment there!"
+                self.render("blogpage.html", post=blog,
+                            username=self.check_login(self.user),
+                            error=error)
+            else:
+                user = self.user.username
+                c = Comment(blog=blog, user=user, comment=comment)
+                c.put()
+                blog.commentcount = blog.comments.count()
+                blog.put()
+
         else:
             user = self.user.username
-            c = Comment(blog=blog, user=user, comment=comment)
-            c.put()
+            l = Like(user=user, blog=blog, like=True)
+            l.put()
+            blog.likecount = blog.likes.count()
+            blog.put()
 
-            self.render_post(int(post_id))
+        self.render_post(int(post_id))
 
 
 class SignUpPage(Handler):
