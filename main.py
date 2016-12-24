@@ -223,9 +223,9 @@ class PermalinkPage(Handler):
     def render_post(self, post_id):
         post = Blog.get_by_id(post_id)
 
-        print post.key()
-
         comments = post.comments
+
+        commentcount = comments.count()
 
         if not post:
             self.error(404)
@@ -233,7 +233,7 @@ class PermalinkPage(Handler):
 
         self.render("blogpage.html", post=post,
                     username=self.check_login(self.user),
-                    comments=comments)
+                    comments=comments, commentcount=commentcount)
 
     def get(self, post_id):
         self.render_post(int(post_id))
