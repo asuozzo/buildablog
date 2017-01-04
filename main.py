@@ -174,14 +174,10 @@ class Like(db.Model):
 
 
 class MainPage(Handler):
-    def render_index(self):
-        blogs = db.GqlQuery("SELECT * FROM Blog ORDER BY created DESC LIMIT 10")
-
+    def get(self):
+        blogs = Blog.all().order('-created')
         self.render("home.html", blogs=blogs,
                     username=self.check_login(self.user))
-
-    def get(self):
-        self.render_index()
 
 
 class SubmitPage(Handler):
@@ -220,14 +216,23 @@ class PermalinkPage(Handler):
         post = Blog.get_by_id(post_id)
 
         comments = post.comments
+        likes = post.likes
+
+        username = self.check_login(self.user)
+        userliked = False
+
+        for like in likes:
+            if username == like.user:
+                userliked = True
 
         if not post:
             self.error(404)
             return
 
         self.render("blogpage.html", post=post,
-                    username=self.check_login(self.user),
-                    comments=comments)
+                    username=username,
+                    comments=comments,
+                    userliked=userliked)
 
     def get(self, post_id):
         self.render_post(int(post_id))
@@ -255,15 +260,24 @@ class PermalinkPage(Handler):
                 user = self.user.username
                 c = Comment(blog=blog, user=user, comment=comment)
                 c.put()
+
+                # Add revised comment count to the related blog entity
                 blog.commentcount = blog.comments.count()
                 blog.put()
 
-        else:
+        elif button == "like":
             user = self.user.username
             l = Like(user=user, blog=blog)
             l.put()
+
+            # Add revised like count to the related blog entity
             blog.likecount = blog.likes.count()
             blog.put()
+
+        else:
+            user = self.user.username
+            like = db.GqlQuery("SELECT * FROM Like WHERE user = :1 LIMIT 1", user).get()
+            like.delete()
 
         self.render_post(int(post_id))
 
