@@ -7,7 +7,7 @@
             {{ p.render() | safe}}
         </div>
         <div class="link">
-            <a href="/{{p.key().id()}}">read full post</a>
+            <a href="/{{p.key.integer_id()}}">read full post</a>
         </div>
     </div>
     {% endfor %}

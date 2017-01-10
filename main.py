@@ -9,7 +9,7 @@ import random
 import hashlib
 import hmac
 
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -94,7 +94,7 @@ class Handler(webapp2.RequestHandler):
         return username
 
     def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
+        self.set_secure_cookie('user_id', str(user.key.id()))
 
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
@@ -105,14 +105,14 @@ class Handler(webapp2.RequestHandler):
         self.user = uid and User.by_id(int(uid))
 
 
-class Blog(db.Model):
-    subject = db.StringProperty(required=True)
-    content = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    last_modified = db.DateTimeProperty(auto_now=True)
-    author = db.StringProperty()
-    commentcount = db.IntegerProperty(default=0)
-    likecount = db.IntegerProperty(default=0)
+class Blog(ndb.Model):
+    subject = ndb.StringProperty(required=True)
+    content = ndb.TextProperty(required=True)
+    created = ndb.DateTimeProperty(auto_now_add=True)
+    last_modified = ndb.DateTimeProperty(auto_now=True)
+    author = ndb.StringProperty()
+    commentcount = ndb.IntegerProperty(default=0)
+    likecount = ndb.IntegerProperty(default=0)
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -124,13 +124,13 @@ class Blog(db.Model):
 
 
 def users_key(group='default'):
-    return db.Key.from_path("users", group)
+    return ndb.Key("users", group)
 
 
-class User(db.Model):
-    username = db.StringProperty(required=True)
-    pw_hash = db.StringProperty(required=True)
-    email = db.EmailProperty()
+class User(ndb.Model):
+    username = ndb.StringProperty(required=True)
+    pw_hash = ndb.StringProperty(required=True)
+    email = ndb.StringProperty()
 
     @classmethod
     def by_id(cls, uid):
@@ -138,7 +138,7 @@ class User(db.Model):
 
     @classmethod
     def by_name(cls, username):
-        u = User.all().filter("username =", username).get()
+        u = User.query().filter(User.username == username).get()
         return u
 
     @classmethod
@@ -156,26 +156,26 @@ class User(db.Model):
             return u
 
 
-class Comment(db.Model):
-    blog = db.ReferenceProperty(Blog, collection_name="comments")
-    user = db.StringProperty()
-    comment = db.TextProperty()
-    created = db.DateTimeProperty(auto_now_add=True)
+class Comment(ndb.Model):
+    blog = ndb.KeyProperty(kind=Blog)
+    user = ndb.StringProperty()
+    comment = ndb.TextProperty()
+    created = ndb.DateTimeProperty(auto_now_add=True)
 
     def render(self):
         self._render_text = self.comment.replace('\n', '<br>')
         return render_str("comment.html", c=self)
 
 
-class Like(db.Model):
-    blog = db.ReferenceProperty(Blog, collection_name="likes")
-    user = db.StringProperty()
-    created = db.DateTimeProperty(auto_now_add=True)
+class Like(ndb.Model):
+    blog = ndb.KeyProperty(kind=Blog)
+    user = ndb.StringProperty()
+    created = ndb.DateTimeProperty(auto_now_add=True)
 
 
 class MainPage(Handler):
     def get(self):
-        blogs = Blog.all().order('-created')
+        blogs = Blog.query().order(-Blog.created).fetch(10)
         self.render("home.html", blogs=blogs,
                     username=self.check_login(self.user))
 
@@ -202,7 +202,7 @@ class SubmitPage(Handler):
                      author=self.user.username)
             b.put()
 
-            id = b.key().id()
+            id = b.key.integer_id()
 
             self.redirect("/" + str(id))
         else:
@@ -215,8 +215,8 @@ class PermalinkPage(Handler):
     def render_post(self, post_id):
         post = Blog.get_by_id(post_id)
 
-        comments = post.comments
-        likes = post.likes
+        comments = Comment.query(Comment.blog == post.key)
+        likes = Like.query(Like.blog == post.key)
 
         username = self.check_login(self.user)
         userliked = False
@@ -258,26 +258,26 @@ class PermalinkPage(Handler):
                             error=error)
             else:
                 user = self.user.username
-                c = Comment(blog=blog, user=user, comment=comment)
+                c = Comment(blog=blog.key, user=user, comment=comment)
                 c.put()
 
                 # Add revised comment count to the related blog entity
-                blog.commentcount = blog.comments.count()
+                blog.commentcount = Comment.query(Comment.blog == blog.key).count()
                 blog.put()
 
         elif button == "like":
             user = self.user.username
-            l = Like(user=user, blog=blog)
+            l = Like(user=user, blog=blog.key)
             l.put()
 
             # Add revised like count to the related blog entity
-            blog.likecount = blog.likes.count()
+            blog.likecount = Like.query(Like.blog == blog.key).count()
             blog.put()
 
         else:
             user = self.user.username
-            like = db.GqlQuery("SELECT * FROM Like WHERE user = :1 LIMIT 1", user).get()
-            like.delete()
+            like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
+            like.key.delete()
 
         self.render_post(int(post_id))
 
