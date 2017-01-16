@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-xs-12 col-md-8 col-md-offset-2">
+    <h2>Are you sure you want to delete your post?</h2>
+    Post: <a href="/{{post.key.integer_id()}}">{{post.subject}}</a><br>
+    Created: {{post.created.strftime("%b %d, %Y %I:%M %p")}}<br>
+    Comments: {{post.commentcount}}<br>
+    Likes: {{post.likecount}}<br>
+
+    <form method="post">
+        <input type="submit" value="Delete">
+    </form>
+</div>
+
+{% endblock %}

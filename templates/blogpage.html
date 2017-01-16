@@ -7,10 +7,14 @@
         </div>
         <div>
             <form method="post">
-                {% if not userliked %}
-                <button type="submit" name="submit" value="like">Like this post</button>
+                {% if post.author != username %}
+                    {% if not userliked %}
+                    <button type="submit" name="submit" value="like">Like this post</button>
+                    {% else %}
+                    <button type="submit" name="submit" value="unlike">Unlike this post</button>
+                    {% endif %}
                 {% else %}
-                <button type="submit" name="submit" value="unlike">Unlike this post</button>
+                    <a href="{{post.key.integer_id()}}/edit">Edit post</a> | <a href="{{post.key.integer_id()}}/delete">Delete post</a>
                 {% endif %}
                 <h4>Comments</h4>
                 <textarea name="comment">{{comment}}</textarea>

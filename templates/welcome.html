@@ -6,7 +6,7 @@
 
     <h3>Your posts</h3>
     {% for b in blogs %}
-    <div><a href="/{{b.key.integer_id()}}">{{b.subject}}</a>  Edit | Delete</div>
+    <div><h5><a href="/{{b.key.integer_id()}}">{{b.subject}}</a></h5><a href="/{{b.key.integer_id()}}/edit">Edit</a> | <a href="/{{b.key.integer_id()}}/delete">Delete</a></div>
     {% endfor %}
 
     <h3>Your comments</h3>

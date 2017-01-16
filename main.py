@@ -284,7 +284,7 @@ class PermalinkPage(Handler):
             blog.likecount = Like.query(Like.blog == blog.key).count()
             blog.put()
 
-        else:
+        elif button=="unlike":
             user = self.user.username
             like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
             like.key.delete()
@@ -359,7 +359,7 @@ class LogInPage(Handler):
 class LogOutPage(Handler):
     def get(self):
         self.logout()
-        self.redirect('/signup')
+        self.redirect('/login')
 
 
 class WelcomePage(Handler):
@@ -375,14 +375,57 @@ class WelcomePage(Handler):
 
 
 class EditPage(Handler):
-    def get(self):
-        self.render('edit.html')
+    def render_edit(self, post_id):
+        post = Blog.get_by_id(int(post_id))
+
+        if post.author != self.check_login(self.user):
+            self.redirect("/" + post_id)
+        else:
+            self.render("edit.html", username=self.user.username,
+                        content=post.content, subject=post.subject)
+
+    def get(self, post_id):
+        self.render_edit(post_id)
+
+    def post(self, post_id):
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+
+        if subject and content:
+            post = Blog.get_by_id(int(post_id))
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect("/" + post_id)
+        else:
+            error = "Make sure to fill out both the title and post fields!"
+            self.render_submit(subject, content, error,
+                               username=self.check_login(self.user))
+
+class DeletePage(Handler):
+    def render_delete(self, post_id):
+        post = Blog.get_by_id(int(post_id))
+
+        if post.author != self.check_login(self.user):
+            self.redirect("/" + post_id)
+        else:
+            self.render("delete.html", username=self.user.username,
+                        post=post)
+
+    def get(self, post_id):
+        self.render_delete(post_id)
+
+    def post(self, post_id):
+        post = Blog.get_by_id(int(post_id))
+        post.key.delete()
+        self.redirect("/welcome")
 
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/newpost', SubmitPage),
-    ('/edit', EditPage),
+    ('/([0-9]+)/edit', EditPage),
+    ('/([0-9]+)/delete', DeletePage),
     ("/signup", SignUpPage),
     ("/login", LogInPage),
     ("/logout", LogOutPage),
