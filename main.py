@@ -158,6 +158,8 @@ class User(ndb.Model):
 
 class Comment(ndb.Model):
     blog = ndb.KeyProperty(kind=Blog)
+    blogtitle = ndb.StringProperty()
+    bloglink = ndb.IntegerProperty()
     user = ndb.StringProperty()
     comment = ndb.TextProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
@@ -169,6 +171,8 @@ class Comment(ndb.Model):
 
 class Like(ndb.Model):
     blog = ndb.KeyProperty(kind=Blog)
+    blogtitle = ndb.StringProperty()
+    bloglink = ndb.IntegerProperty()
     user = ndb.StringProperty()
     created = ndb.DateTimeProperty(auto_now_add=True)
 
@@ -258,7 +262,10 @@ class PermalinkPage(Handler):
                             error=error)
             else:
                 user = self.user.username
-                c = Comment(blog=blog.key, user=user, comment=comment)
+                blogtitle = blog.subject
+                bloglink = int(post_id)
+                c = Comment(blog=blog.key, user=user, comment=comment,
+                            blogtitle=blogtitle, bloglink=bloglink)
                 c.put()
 
                 # Add revised comment count to the related blog entity
@@ -267,7 +274,10 @@ class PermalinkPage(Handler):
 
         elif button == "like":
             user = self.user.username
-            l = Like(user=user, blog=blog.key)
+            blogtitle = blog.subject
+            bloglink = int(post_id)
+            l = Like(user=user, blog=blog.key, blogtitle=blogtitle,
+                     bloglink=bloglink)
             l.put()
 
             # Add revised like count to the related blog entity
@@ -355,9 +365,15 @@ class LogOutPage(Handler):
 class WelcomePage(Handler):
     def get(self):
         if self.user:
-            self.render('welcome.html', username=self.check_login(self.user))
+            blogs = Blog.query(Blog.author == self.user.username)
+            comments = Comment.query(Comment.user == self.user.username)
+            likes = Like.query(Like.user == self.user.username)
+            self.render('welcome.html', username=self.check_login(self.user),
+                        blogs=blogs, comments=comments, likes=likes)
         else:
             self.redirect("/signup")
+
+
 
 
 app = webapp2.WSGIApplication([
