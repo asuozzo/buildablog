@@ -374,11 +374,15 @@ class WelcomePage(Handler):
             self.redirect("/signup")
 
 
+class EditPage(Handler):
+    def get(self):
+        self.render('edit.html')
 
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/newpost', SubmitPage),
+    ('/edit', EditPage),
     ("/signup", SignUpPage),
     ("/login", LogInPage),
     ("/logout", LogOutPage),
