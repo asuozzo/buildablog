@@ -1,29 +1,41 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="col-xs-12 col-md-8 col-md-offset-2">
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
         <div class="postbody">
             {{post.render() | safe}}
         </div>
         <div>
-            <form method="post">
-                {% if post.author != username %}
-                    {% if not userliked %}
-                    <button type="submit" name="submit" value="like">Like this post</button>
+            <form method="post" class="entry-form">
+                <div class="form-group">
+                    {% if post.author != username %}
+                        {% if not userliked %}
+                        <button type="submit" name="submit" class="btn btn-primary" value="like">Like this post</button>
+                        {% else %}
+                        <button type="submit" name="submit" class="btn btn-primary" value="unlike">Unlike this post</button>
+                        {% endif %}
                     {% else %}
-                    <button type="submit" name="submit" value="unlike">Unlike this post</button>
+                        <a href="{{post.key.integer_id()}}/edit">Edit post</a> | <a href="{{post.key.integer_id()}}/delete">Delete post</a>
                     {% endif %}
-                {% else %}
-                    <a href="{{post.key.integer_id()}}/edit">Edit post</a> | <a href="{{post.key.integer_id()}}/delete">Delete post</a>
-                {% endif %}
-                <h4>Comments</h4>
-                <textarea name="comment">{{comment}}</textarea>
-                <div>{{error}}</div>
-                <button type="submit" name="submit" value="comment">Submit</button>
+                </div>
             </form>
-            {% for c in comments %}
-                {{ c.render() | safe}}
-            {% endfor %}
+
+                <div>
+                    {% for c in comments %}
+                        {{ c.render() | safe}}
+                    {% endfor %}
+                </div>
+
+            <form method="post" class="entry-form">
+                <div class="form-group">
+                    <h4>Comments</h4>
+                    <textarea name="comment" class="form-control">{{comment}}</textarea>
+                    <div class="error">{{error}}</div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" name="submit" class="btn btn-info" value="comment">Submit</button>
+                </div>
+            </form>
         </div>
     </div>
 {% endblock %}

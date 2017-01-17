@@ -245,49 +245,45 @@ class PermalinkPage(Handler):
         button = self.request.get("submit")
         blog = Blog.get_by_id(int(post_id))
 
-        print button
+        if not self.check_login(self.user):
+            self.redirect("/login")
+        else:
+            if button == "comment":
+                comment = self.request.get("comment")
 
-        if button == "comment":
-            comment = self.request.get("comment")
+                if comment == "":
+                    error = "There's no comment there!"
+                    self.render("blogpage.html", post=blog,
+                                username=self.check_login(self.user),
+                                error=error)
+                else:
+                    user = self.user.username
+                    blogtitle = blog.subject
+                    bloglink = int(post_id)
+                    c = Comment(blog=blog.key, user=user, comment=comment,
+                                blogtitle=blogtitle, bloglink=bloglink)
+                    c.put()
 
-            if not self.check_login(self.user):
-                error = "You must be logged in to post a comment."
-                self.render("blogpage.html", post=blog,
-                            username=self.check_login(self.user),
-                            error=error, comment=comment)
-            elif comment == "":
-                error = "There's no comment there!"
-                self.render("blogpage.html", post=blog,
-                            username=self.check_login(self.user),
-                            error=error)
-            else:
+                    # Add revised comment count to the related blog entity
+                    blog.commentcount = Comment.query(Comment.blog == blog.key).count()
+                    blog.put()
+
+            elif button == "like":
                 user = self.user.username
                 blogtitle = blog.subject
                 bloglink = int(post_id)
-                c = Comment(blog=blog.key, user=user, comment=comment,
-                            blogtitle=blogtitle, bloglink=bloglink)
-                c.put()
+                l = Like(user=user, blog=blog.key, blogtitle=blogtitle,
+                         bloglink=bloglink)
+                l.put()
 
-                # Add revised comment count to the related blog entity
-                blog.commentcount = Comment.query(Comment.blog == blog.key).count()
+                # Add revised like count to the related blog entity
+                blog.likecount = Like.query(Like.blog == blog.key).count()
                 blog.put()
 
-        elif button == "like":
-            user = self.user.username
-            blogtitle = blog.subject
-            bloglink = int(post_id)
-            l = Like(user=user, blog=blog.key, blogtitle=blogtitle,
-                     bloglink=bloglink)
-            l.put()
-
-            # Add revised like count to the related blog entity
-            blog.likecount = Like.query(Like.blog == blog.key).count()
-            blog.put()
-
-        elif button=="unlike":
-            user = self.user.username
-            like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
-            like.key.delete()
+            elif button =="unlike":
+                user = self.user.username
+                like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
+                like.key.delete()
 
         self.render_post(int(post_id))
 
@@ -336,7 +332,7 @@ class SignUpPage(Handler):
             u.put()
 
             self.login(u)
-            self.redirect('/welcome')
+            self.redirect('/profile')
 
 
 class LogInPage(Handler):
@@ -350,7 +346,7 @@ class LogInPage(Handler):
         u = User.login(username, password)
         if u:
             self.login(u)
-            self.redirect('/welcome')
+            self.redirect('/profile')
         else:
             msg = 'Invalid login'
             self.render('login.html', error=msg)
@@ -362,13 +358,13 @@ class LogOutPage(Handler):
         self.redirect('/login')
 
 
-class WelcomePage(Handler):
+class ProfilePage(Handler):
     def get(self):
         if self.user:
             blogs = Blog.query(Blog.author == self.user.username)
             comments = Comment.query(Comment.user == self.user.username)
             likes = Like.query(Like.user == self.user.username)
-            self.render('welcome.html', username=self.check_login(self.user),
+            self.render('profile.html', username=self.check_login(self.user),
                         blogs=blogs, comments=comments, likes=likes)
         else:
             self.redirect("/signup")
@@ -418,7 +414,7 @@ class DeletePage(Handler):
     def post(self, post_id):
         post = Blog.get_by_id(int(post_id))
         post.key.delete()
-        self.redirect("/welcome")
+        self.redirect("/profile")
 
 
 app = webapp2.WSGIApplication([
@@ -429,6 +425,6 @@ app = webapp2.WSGIApplication([
     ("/signup", SignUpPage),
     ("/login", LogInPage),
     ("/logout", LogOutPage),
-    ("/welcome", WelcomePage),
+    ("/profile", ProfilePage),
     ('/([0-9]+)', PermalinkPage)
 ], debug=True)

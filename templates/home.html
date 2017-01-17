@@ -2,13 +2,25 @@
 
 {% block content %}
     {% for p in blogs %}
-    <div class="col-xs-12 col-md-8 col-md-offset-2">
-        <div class="postbody">
-            {{ p.render() | safe}}
+    <div class="col-xs-12 col-md-6 col-md-offset-3">
+        <div class="post-heading">
+            <div class="post-title">
+                <a href="/{{p.key.integer_id()}}">{{p.subject}}</a>
+            </div>
+            <div class="post-social">
+              <i class="fa fa-thumbs-up" aria-hidden="true"></i> {{p.likecount}}&nbsp;&nbsp;&nbsp;<i class="fa fa-comments" aria-hidden="true"></i> {{p.commentcount}}
+            </div>
+        </div>
+        <div class="post-info">
+            posted by {{p.author}} on {{p.created.strftime("%b %d, %Y")}}
+          </div>
+        <div class="home-body">
+            {{p.content | truncate(300) }}
         </div>
         <div class="link">
             <a href="/{{p.key.integer_id()}}">read full post</a>
         </div>
+        <hr>
     </div>
     {% endfor %}
 {% endblock %}

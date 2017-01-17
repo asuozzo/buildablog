@@ -1,9 +1,8 @@
-<div class="comment">
+<div class="comment well">
   <div class="comment-content">
     {{c._render_text | safe}}
   </div>
-  <div class="comment-date">
-    {{c.created.strftime("%b %d, %Y %I:%M %p")}}
+  <div class="post-info">
+    posted by {{c.user}} on {{c.created.strftime("%b %d, %Y")}}
   </div>
-  <div class="comment-author">Written by {{c.user}}</div>
 </div>

@@ -8,17 +8,42 @@
     <title>My blog</title>
 </head>
 <body>
-    <header class="text-center"><h1><a href="/">This is my blog</a></h1>
-    {% if username %}
-        Hi, {{username}}! | <a href="/welcome">my account</a> | <a href="/newpost">create new post</a> | <a href="/logout">log out</a>
-    {% else %}
-        <a href="/login">log in</a>
-    {% endif %}
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <ul class="nav">
+                {% if username %}
+                    <li class="hello">Hi, {{username}}!</li>
+                    <li><a href="/profile">profile</a></li>
+                    <li><a href="/newpost">create new post</a></li>
+                    <li><a href="/logout">log out</a></li>
+                {% else %}
+                    <li><a href="/login">log in</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <header class="text-center main-header">
+        <div class="header-background col-xs-10 col-xs-offset-1 col-md-8 col-md-offset-2">
+            <h1 class="title"><a href="/">Best blog ever</a></h1>
+        </div>
     </header>
 
-    <div id="container">
-        {% block content %}
-        {% endblock %}
+    <div class="container">
+        <div class="row">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+    <div class="container footer">
+        <div class="row">
+            <footer class="col-xs-12 col-md-8 col-md-offset-2 ">
+                <ul class="footer-info">
+                    <li><a href="https://www.github.com/asuozzo"><i class="fa fa-github"></i> github</a></li>
+                    <li><a href="https://www.twitter.com/asuozzo"><i class="fa fa-twitter"></i> twitter</a></li>
+                </ul>
+            </footer>
+        </div>
     </div>
 </body>
 </html>

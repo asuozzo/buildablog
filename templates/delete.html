@@ -3,13 +3,14 @@
 {% block content %}
 <div class="col-xs-12 col-md-8 col-md-offset-2">
     <h2>Are you sure you want to delete your post?</h2>
-    Post: <a href="/{{post.key.integer_id()}}">{{post.subject}}</a><br>
-    Created: {{post.created.strftime("%b %d, %Y %I:%M %p")}}<br>
-    Comments: {{post.commentcount}}<br>
-    Likes: {{post.likecount}}<br>
+    <h4><a href="/{{post.key.integer_id()}}">{{post.subject}}</a></h4>
+    <div class="post-info">Posted {{post.created.strftime("%b %d, %Y %I:%M %p")}}</div>
 
-    <form method="post">
-        <input type="submit" value="Delete">
+    <b>Comments</b>: {{post.commentcount}}<br>
+    <b>Likes</b>: {{post.likecount}}<br><br>
+
+    <form method="post" class="entry-form">
+        <input type="submit" class="btn btn-info" value="Delete">
     </form>
 </div>
 

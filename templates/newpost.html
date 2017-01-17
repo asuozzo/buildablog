@@ -1,22 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="col-xs-12 col-md-8 col-md-offset-2">
-    <h1>Submit a blog entry</h1>
-    <form method="post">
-        <label>
-            <div>title</div>
-            <input type="text" name="subject" value="{{subject}}">
-        </label>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-md-8 col-md-offset-2">
+            <h2>Submit a blog entry</h2>
+            <form method="post" class="entry-form">
+                <div class="form-group">
+                    <label for="subject">Title</label>
+                    <input type="text" class="form-control" name="subject" id="subject" value="{{subject}}">
+                </div>
 
-        <label>
-            <div>post</div>
-            <textarea class="submit-post" name="content">{{content}}</textarea>
-        </label>
+                <div class="form-group">
+                    <label for="content">Post</label>
+                    <textarea class="submit-post form-control" name="content" rows="5">{{content}}</textarea><br>
+                    <div class="error">{{error}}</div>
+                </div>
 
-        <div class="error">{{error}}</div>
-
-        <input type="submit">
-    </form>
+                <div class="form-group">
+                    <input type="submit" value="Post" class="btn btn-info">
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
