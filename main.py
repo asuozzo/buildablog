@@ -260,30 +260,28 @@ class PermalinkPage(Handler):
                     user = self.user.username
                     blogtitle = blog.subject
                     bloglink = int(post_id)
-                    c = Comment(blog=blog.key, user=user, comment=comment,
+                    c = Comment(parent=blog.key, blog=blog.key, user=user, comment=comment,
                                 blogtitle=blogtitle, bloglink=bloglink)
                     c.put()
 
-                    # Add revised comment count to the related blog entity
-                    blog.commentcount = Comment.query(Comment.blog == blog.key).count()
-                    blog.put()
 
             elif button == "like":
                 user = self.user.username
                 blogtitle = blog.subject
                 bloglink = int(post_id)
-                l = Like(user=user, blog=blog.key, blogtitle=blogtitle,
+                l = Like(parent=blog.key, user=user, blog=blog.key, blogtitle=blogtitle,
                          bloglink=bloglink)
                 l.put()
 
-                # Add revised like count to the related blog entity
-                blog.likecount = Like.query(Like.blog == blog.key).count()
-                blog.put()
-
-            elif button =="unlike":
+            elif button == "unlike":
                 user = self.user.username
                 like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
                 like.key.delete()
+
+            # Add revised comment/like count to the related blog entity
+            blog.commentcount = Comment.query(ancestor=blog.key).count()
+            blog.likecount = Like.query(ancestor=blog.key).count()
+            blog.put()
 
         self.render_post(int(post_id))
 
