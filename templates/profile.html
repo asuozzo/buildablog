@@ -27,7 +27,6 @@
             {% for c in comments %}
             <div class="comment">"{{c.comment | truncate(300) }}"</div>
             <div class="post-info">on post <a href="/{{c.bloglink}}">{{c.blogtitle}}</a></div>
-            <a href="">Edit</a> | <a href="">Delete</a>
             <hr>
             {% endfor %}
         </div>

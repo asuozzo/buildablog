@@ -19,16 +19,28 @@
                     {% endif %}
                 </div>
             </form>
-
+                <h4>Comments</h4>
                 <div>
                     {% for c in comments %}
-                        {{ c.render() | safe}}
+                        <div class="comment well">
+                          <div class="comment-content">
+                            {{c._render_text | safe}}
+                          </div>
+                          <div class="comment-info">
+                            posted by {{c.user}} on {{c.created.strftime("%b %d, %Y")}}
+                          </div>
+                        {% if c.user == username %}
+                        <div class="edit-comment">
+                            <a href="{{post.key.integer_id()}}/{{c.key.integer_id()}}/edit">Edit</a> | <a href="{{post.key.integer_id()}}/{{c.key.integer_id()}}/delete">Delete</a>
+                        </div>
+                        {% endif %}
+                        </div>
                     {% endfor %}
                 </div>
 
             <form method="post" class="entry-form">
                 <div class="form-group">
-                    <h4>Comments</h4>
+
                     <textarea name="comment" class="form-control">{{comment}}</textarea>
                     <div class="error">{{error}}</div>
                 </div>

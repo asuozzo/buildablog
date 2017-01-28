@@ -264,7 +264,6 @@ class PermalinkPage(Handler):
                                 blogtitle=blogtitle, bloglink=bloglink)
                     c.put()
 
-
             elif button == "like":
                 user = self.user.username
                 blogtitle = blog.subject
@@ -284,6 +283,8 @@ class PermalinkPage(Handler):
             blog.put()
 
         self.render_post(int(post_id))
+
+
 
 
 class SignUpPage(Handler):
@@ -396,6 +397,23 @@ class EditPage(Handler):
             self.render_submit(subject, content, error,
                                username=self.check_login(self.user))
 
+
+class EditComment(Handler):
+    def render_edit(self, post_id, comment_id):
+        ## how to get the comment id?
+
+        comment = Comment.get_by_id(int(comment_id))
+        print comment
+
+        if comment.user != self.check_login(self.user):
+            self.redirect("/" + post_id + "/" + comment_id)
+        else:
+            self.render("edit.html", username=self.user.username,
+                        content=comment.content)
+
+    def get(self, post_id, comment_id):
+        self.render_edit(post_id, comment_id)
+
 class DeletePage(Handler):
     def render_delete(self, post_id):
         post = Blog.get_by_id(int(post_id))
@@ -419,6 +437,7 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/newpost', SubmitPage),
     ('/([0-9]+)/edit', EditPage),
+    ('/([0-9]+)/([0-9]+)/edit', EditComment),
     ('/([0-9]+)/delete', DeletePage),
     ("/signup", SignUpPage),
     ("/login", LogInPage),
