@@ -88,8 +88,8 @@ class PermalinkPage(Handler):
     def render_post(self, post_id):
         post = Blog.by_id(post_id)
 
-        comments = Comment.query(Comment.blog == post.key)
-        likes = Like.query(Like.blog == post.key)
+        comments = Comment.query(ancestor=post.key)
+        likes = Like.query(ancestor=post.key)
 
         username = self.check_login(self.user)
         userliked = False
