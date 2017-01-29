@@ -47,6 +47,7 @@ class Handler(webapp2.RequestHandler):
 
 
 class MainPage(Handler):
+    '''The main blog landing page'''
     def get(self):
         blogs = Blog.query().order(-Blog.created).fetch(10)
         self.render("home.html", blogs=blogs,
@@ -54,6 +55,7 @@ class MainPage(Handler):
 
 
 class SubmitPage(Handler):
+    '''Create a new post'''
     def render_submit(self, subject="", content="", error="", username=""):
 
         self.render("newpost.html", subject=subject,
@@ -88,6 +90,7 @@ class SubmitPage(Handler):
 
 
 class PermalinkPage(Handler):
+    '''The landing page for each blog post'''
     def render_post(self, post_id):
         post = Blog.by_id(post_id)
 
@@ -167,6 +170,7 @@ class PermalinkPage(Handler):
 
 
 class SignUpPage(Handler):
+    '''Sign up a new user'''
     def get(self):
         self.render("signup.html")
 
@@ -215,6 +219,7 @@ class SignUpPage(Handler):
 
 
 class LogInPage(Handler):
+    '''Log the user in'''
     def get(self):
         self.render("login.html")
 
@@ -232,13 +237,14 @@ class LogInPage(Handler):
 
 
 class LogOutPage(Handler):
+    '''Log the user out'''
     def get(self):
         self.logout()
         self.redirect('/login')
 
 
-# Create a landing page for logged in user
 class ProfilePage(Handler):
+    ''' Display a profile page with a logged-in user's activity '''
     def get(self):
         if self.user:
             # Get all items associated with the user
@@ -251,8 +257,8 @@ class ProfilePage(Handler):
             self.redirect("/login")
 
 
-# Edit a user's post
 class EditPage(Handler):
+    ''' Edit a user's post '''
     def render_edit(self, post_id):
         post = Blog.by_id(int(post_id))
 
@@ -287,8 +293,8 @@ class EditPage(Handler):
                                  username=self.check_login(self.user))
 
 
-# Edit a user's comment
 class EditComment(Handler):
+    ''' Edit a user's comment '''
     def render_edit(self, post_id, comment_id):
 
         post = Blog.by_id(int(post_id))
@@ -323,8 +329,8 @@ class EditComment(Handler):
                                  username=self.check_login(self.user))
 
 
-# Delete a page
 class DeletePage(Handler):
+    ''' Delete a page '''
     def render_delete(self, post_id):
         post = Blog.by_id(int(post_id))
 
@@ -347,8 +353,8 @@ class DeletePage(Handler):
             self.redirect("/profile")
 
 
-# Delete a comment
 class DeleteComment(Handler):
+    '''Delete a comment'''
     def render_delete(self, post_id, comment_id):
         post = Blog.by_id(int(post_id))
         comment = Comment.get_by_id(int(comment_id), parent=post.key)
