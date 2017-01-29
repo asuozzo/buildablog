@@ -261,7 +261,7 @@ class EditPage(Handler):
         else:
             self.render("edit.html", username=self.user.username,
                         content=post.content, subject=post.subject,
-                        type="post")
+                        type="post", post_id=post_id)
 
     def get(self, post_id):
         self.render_edit(post_id)
@@ -283,8 +283,8 @@ class EditPage(Handler):
                 self.redirect("/" + post_id)
             else:
                 error = "Make sure to fill out both the title and post fields!"
-                self.render_submit(subject, content, error,
-                                   username=self.check_login(self.user))
+                self.render_edit(subject, content, error,
+                                 username=self.check_login(self.user))
 
 
 # Edit a user's comment
@@ -299,7 +299,7 @@ class EditComment(Handler):
         else:
             self.render("edit.html", username=self.user.username,
                         content=comment.comment, subject=post.subject,
-                        type="comment")
+                        type="comment", post_id=post_id)
 
     def get(self, post_id, comment_id):
         self.render_edit(post_id, comment_id)
@@ -319,8 +319,8 @@ class EditComment(Handler):
                 self.redirect("/" + post_id)
             else:
                 error = "Make sure to there's text in the comment field!"
-                self.render_submit(content, error,
-                                   username=self.check_login(self.user))
+                self.render_edit(content, error,
+                                 username=self.check_login(self.user))
 
 
 # Delete a page
@@ -332,7 +332,7 @@ class DeletePage(Handler):
             self.redirect("/" + post_id)
         else:
             self.render("delete.html", username=self.user.username,
-                        post=post, type="post")
+                        post=post, type="post", post_id=post_id)
 
     def get(self, post_id):
         self.render_delete(post_id)
@@ -357,7 +357,8 @@ class DeleteComment(Handler):
             self.redirect("/" + post_id)
         else:
             self.render("delete.html", username=self.user.username,
-                        comment=comment, post=post, type="comment")
+                        comment=comment, post=post, type="comment",
+                        post_id=post_id)
 
     def get(self, post_id, comment_id):
         self.render_delete(post_id, comment_id)
