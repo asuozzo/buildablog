@@ -2,12 +2,18 @@
 
 {% block content %}
 <div class="col-xs-12 col-md-8 col-md-offset-2">
-    <h2>Are you sure you want to delete your post?</h2>
-    <h4><a href="/{{post.key.integer_id()}}">{{post.subject}}</a></h4>
-    <div class="post-info">Posted {{post.created.strftime("%b %d, %Y %I:%M %p")}}</div>
 
-    <b>Comments</b>: {{post.commentcount}}<br>
-    <b>Likes</b>: {{post.likecount}}<br><br>
+    <h2>Are you sure you want to delete your {{type}}?</h2>
+    {% if type == "post" %}
+        <h4><a href="/{{post.key.integer_id()}}">{{post.subject}}</a></h4>
+        <div class="post-info">Posted {{post.created.strftime("%b %d, %Y %I:%M %p")}}</div>
+
+        <b>Comments</b>: {{post.commentcount}}<br>
+        <b>Likes</b>: {{post.likecount}}<br><br>
+    {% else %}
+        <h4>Comment on <a href="/{{post.key.integer_id()}}">{{post.subject}}</a></h4>
+        <div class="post-info">Posted {{comment.created.strftime("%b %d, %Y %I:%M %p")}}</div>
+    {% endif %}
 
     <form method="post" class="entry-form">
         <input type="submit" class="btn btn-info" value="Delete">

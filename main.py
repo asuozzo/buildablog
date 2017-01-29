@@ -217,7 +217,7 @@ class SubmitPage(Handler):
 
 class PermalinkPage(Handler):
     def render_post(self, post_id):
-        post = Blog.get_by_id(post_id)
+        post = Blog.by_id(post_id)
 
         comments = Comment.query(Comment.blog == post.key)
         likes = Like.query(Like.blog == post.key)
@@ -243,11 +243,12 @@ class PermalinkPage(Handler):
 
     def post(self, post_id):
         button = self.request.get("submit")
-        blog = Blog.get_by_id(int(post_id))
+        blog = Blog.by_id(int(post_id))
 
         if not self.check_login(self.user):
             self.redirect("/login")
         else:
+            # Check which button the user pressed
             if button == "comment":
                 comment = self.request.get("comment")
 
@@ -260,16 +261,17 @@ class PermalinkPage(Handler):
                     user = self.user.username
                     blogtitle = blog.subject
                     bloglink = int(post_id)
-                    c = Comment(parent=blog.key, blog=blog.key, user=user, comment=comment,
-                                blogtitle=blogtitle, bloglink=bloglink)
+                    c = Comment(parent=blog.key, blog=blog.key, user=user,
+                                comment=comment, blogtitle=blogtitle,
+                                bloglink=bloglink)
                     c.put()
 
             elif button == "like":
                 user = self.user.username
                 blogtitle = blog.subject
                 bloglink = int(post_id)
-                l = Like(parent=blog.key, user=user, blog=blog.key, blogtitle=blogtitle,
-                         bloglink=bloglink)
+                l = Like(parent=blog.key, user=user, blog=blog.key,
+                         blogtitle=blogtitle, bloglink=bloglink)
                 l.put()
 
             elif button == "unlike":
@@ -283,8 +285,6 @@ class PermalinkPage(Handler):
             blog.put()
 
         self.render_post(int(post_id))
-
-
 
 
 class SignUpPage(Handler):
@@ -301,6 +301,7 @@ class SignUpPage(Handler):
         params = dict(username=username,
                       email=email)
 
+        # validate signup form
         if not valid_username(username):
             params['error_username'] = "That's not a valid username."
             have_error = True
@@ -357,27 +358,31 @@ class LogOutPage(Handler):
         self.redirect('/login')
 
 
+# Create a landing page for logged in user
 class ProfilePage(Handler):
     def get(self):
         if self.user:
+            # Get all items associated with the user
             blogs = Blog.query(Blog.author == self.user.username)
             comments = Comment.query(Comment.user == self.user.username)
             likes = Like.query(Like.user == self.user.username)
             self.render('profile.html', username=self.check_login(self.user),
                         blogs=blogs, comments=comments, likes=likes)
         else:
-            self.redirect("/signup")
+            self.redirect("/login")
 
 
+# Edit a user's post
 class EditPage(Handler):
     def render_edit(self, post_id):
-        post = Blog.get_by_id(int(post_id))
+        post = Blog.by_id(int(post_id))
 
         if post.author != self.check_login(self.user):
             self.redirect("/" + post_id)
         else:
             self.render("edit.html", username=self.user.username,
-                        content=post.content, subject=post.subject)
+                        content=post.content, subject=post.subject,
+                        type="post")
 
     def get(self, post_id):
         self.render_edit(post_id)
@@ -387,7 +392,7 @@ class EditPage(Handler):
         content = self.request.get("content")
 
         if subject and content:
-            post = Blog.get_by_id(int(post_id))
+            post = Blog.by_id(int(post_id))
             post.subject = subject
             post.content = content
             post.put()
@@ -398,38 +403,78 @@ class EditPage(Handler):
                                username=self.check_login(self.user))
 
 
+# Edit a user's comment
 class EditComment(Handler):
     def render_edit(self, post_id, comment_id):
-        ## how to get the comment id?
 
-        comment = Comment.get_by_id(int(comment_id))
-        print comment
+        post = Blog.by_id(int(post_id))
+        comment = Comment.get_by_id(int(comment_id), parent=post.key)
 
         if comment.user != self.check_login(self.user):
-            self.redirect("/" + post_id + "/" + comment_id)
+            self.redirect("/" + post_id)
         else:
             self.render("edit.html", username=self.user.username,
-                        content=comment.content)
+                        content=comment.comment, subject=post.subject,
+                        type="comment")
 
     def get(self, post_id, comment_id):
         self.render_edit(post_id, comment_id)
 
+    def post(self, post_id, comment_id):
+        content = self.request.get("content")
+
+        if content:
+            post = Blog.by_id(int(post_id))
+            comment = Comment.get_by_id(int(comment_id), parent=post.key)
+            comment.comment = content
+            comment.put()
+            self.redirect("/" + post_id)
+        else:
+            error = "Make sure to there's text in the comment field!"
+            self.render_submit(content, error,
+                               username=self.check_login(self.user))
+
+
+# Delete a page
 class DeletePage(Handler):
     def render_delete(self, post_id):
-        post = Blog.get_by_id(int(post_id))
+        post = Blog.by_id(int(post_id))
 
         if post.author != self.check_login(self.user):
             self.redirect("/" + post_id)
         else:
             self.render("delete.html", username=self.user.username,
-                        post=post)
+                        post=post, type="post")
 
     def get(self, post_id):
         self.render_delete(post_id)
 
     def post(self, post_id):
-        post = Blog.get_by_id(int(post_id))
+        post = Blog.by_id(int(post_id))
         post.key.delete()
+        self.redirect("/profile")
+
+
+# Delete a comment
+class DeleteComment(Handler):
+    def render_delete(self, post_id, comment_id):
+        post = Blog.by_id(int(post_id))
+        comment = Comment.get_by_id(int(comment_id), parent=post.key)
+
+        if comment.user != self.check_login(self.user):
+            self.redirect("/" + post_id)
+        else:
+            self.render("delete.html", username=self.user.username,
+                        comment=comment, post=post, type="comment")
+
+    def get(self, post_id, comment_id):
+        self.render_delete(post_id, comment_id)
+
+    def post(self, post_id, comment_id):
+        post = Blog.by_id(int(post_id))
+        comment = Comment.get_by_id(int(comment_id), parent=post.key)
+
+        comment.key.delete()
         self.redirect("/profile")
 
 
@@ -437,7 +482,8 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/newpost', SubmitPage),
     ('/([0-9]+)/edit', EditPage),
-    ('/([0-9]+)/([0-9]+)/edit', EditComment),
+    ('/([0-9]+)/comment/([0-9]+)/edit', EditComment),
+    ('/([0-9]+)/comment/([0-9]+)/delete', DeleteComment),
     ('/([0-9]+)/delete', DeletePage),
     ("/signup", SignUpPage),
     ("/login", LogInPage),

@@ -5,6 +5,12 @@
     box-sizing: border-box;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 h1 {
     font-size: 4em;
 }
@@ -37,7 +43,7 @@ header {
 
 
 .main-header {
-    padding: 150px 20px 300px 20px;
+    padding: 150px 20px 100px 20px;
 }
 
 .header-background {
@@ -76,6 +82,10 @@ a:hover {
 }
 .navbar-custom .nav li a {
     text-transform: uppercase;
+}
+
+content {
+    flex:1;
 }
 
 .post-heading {
@@ -141,6 +151,12 @@ a:hover {
 
 .error {
     color: #aa6708;
+}
+
+.main-body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
 }
 
 @media (max-width: 550px) {

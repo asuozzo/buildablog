@@ -4,6 +4,7 @@
 <div class="col-xs-12 col-md-8 col-md-offset-2">
     <h2>Edit your post</h2>
     <form method="post" class="entry-form">
+        {% if type == "post" %}
         <div class="form-group">
             <label for="subject">Title</label>
             <input type="text" class="form-control" name="subject" id="subject" value="{{subject}}">
@@ -11,12 +12,16 @@
 
         <div class="form-group">
             <label for="content">Post</label>
+        {% else %}
+        <div class="form-group">
+            <label for="content">Comment on "{{subject}}"</label>
+        {% endif %}
             <textarea class="submit-post form-control" name="content" rows="5">{{content}}</textarea><br>
             <div class="error">{{error}}</div>
         </div>
 
         <div class="form-group">
-            <input type="submit" value="Post" class="btn btn-info">
+            <input type="submit" value="Revise post" class="btn btn-info">
         </div>
     </form>
 </div>

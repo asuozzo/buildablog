@@ -24,14 +24,14 @@
                     {% for c in comments %}
                         <div class="comment well">
                           <div class="comment-content">
-                            {{c._render_text | safe}}
+                            {{c.comment | safe}}
                           </div>
                           <div class="comment-info">
                             posted by {{c.user}} on {{c.created.strftime("%b %d, %Y")}}
                           </div>
                         {% if c.user == username %}
                         <div class="edit-comment">
-                            <a href="{{post.key.integer_id()}}/{{c.key.integer_id()}}/edit">Edit</a> | <a href="{{post.key.integer_id()}}/{{c.key.integer_id()}}/delete">Delete</a>
+                            <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/edit">Edit</a> | <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/delete">Delete</a>
                         </div>
                         {% endif %}
                         </div>
