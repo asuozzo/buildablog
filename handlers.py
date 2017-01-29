@@ -64,24 +64,27 @@ class SubmitPage(Handler):
         if self.user:
             self.render_submit()
         else:
-            self.redirect("/signup")
+            self.redirect("/login")
 
     def post(self):
-        subject = self.request.get("subject")
-        content = self.request.get("content")
+        if self.user:
+            subject = self.request.get("subject")
+            content = self.request.get("content")
 
-        if subject and content:
-            b = Blog(subject=subject, content=content,
-                     author=self.user.username)
-            b.put()
+            if subject and content:
+                b = Blog(subject=subject, content=content,
+                         author=self.user.username)
+                b.put()
 
-            id = b.key.integer_id()
+                id = b.key.integer_id()
 
-            self.redirect("/" + str(id))
+                self.redirect("/" + str(id))
+            else:
+                error = "Make sure to fill out both the title and post fields!"
+                self.render_submit(subject, content, error,
+                                   username=self.check_login(self.user))
         else:
-            error = "Make sure to fill out both the title and post fields!"
-            self.render_submit(subject, content, error,
-                               username=self.check_login(self.user))
+            self.redirect("/login")
 
 
 class PermalinkPage(Handler):
@@ -137,16 +140,23 @@ class PermalinkPage(Handler):
 
             elif button == "like":
                 user = self.user.username
-                blogtitle = blog.subject
-                bloglink = int(post_id)
-                l = Like(parent=blog.key, user=user, blog=blog.key,
-                         blogtitle=blogtitle, bloglink=bloglink)
-                l.put()
+                userliked = False
+                likes = Like.query(ancestor=blog.key)
+                for like in likes:
+                    if username == like.user:
+                        userliked = True
+                if (user != blog.author) & (not userliked):
+                    blogtitle = blog.subject
+                    bloglink = int(post_id)
+                    l = Like(parent=blog.key, user=user, blog=blog.key,
+                             blogtitle=blogtitle, bloglink=bloglink)
+                    l.put()
 
             elif button == "unlike":
                 user = self.user.username
-                like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
-                like.key.delete()
+                if user != blog.author:
+                    like = Like.gql("WHERE user = :1 LIMIT 1", user).get()
+                    like.key.delete()
 
             # Add revised comment/like count to the related blog entity
             blog.commentcount = Comment.query(ancestor=blog.key).count()
@@ -257,19 +267,24 @@ class EditPage(Handler):
         self.render_edit(post_id)
 
     def post(self, post_id):
-        subject = self.request.get("subject")
-        content = self.request.get("content")
+        post = Blog.by_id(int(post_id))
 
-        if subject and content:
-            post = Blog.by_id(int(post_id))
-            post.subject = subject
-            post.content = content
-            post.put()
+        if post.author != self.check_login(self.user):
             self.redirect("/" + post_id)
         else:
-            error = "Make sure to fill out both the title and post fields!"
-            self.render_submit(subject, content, error,
-                               username=self.check_login(self.user))
+            subject = self.request.get("subject")
+            content = self.request.get("content")
+
+            if subject and content:
+                post = Blog.by_id(int(post_id))
+                post.subject = subject
+                post.content = content
+                post.put()
+                self.redirect("/" + post_id)
+            else:
+                error = "Make sure to fill out both the title and post fields!"
+                self.render_submit(subject, content, error,
+                                   username=self.check_login(self.user))
 
 
 # Edit a user's comment
@@ -290,18 +305,22 @@ class EditComment(Handler):
         self.render_edit(post_id, comment_id)
 
     def post(self, post_id, comment_id):
-        content = self.request.get("content")
+        post = Blog.by_id(int(post_id))
+        comment = Comment.get_by_id(int(comment_id), parent=post.key)
 
-        if content:
-            post = Blog.by_id(int(post_id))
-            comment = Comment.get_by_id(int(comment_id), parent=post.key)
-            comment.comment = content
-            comment.put()
+        if comment.user != self.check_login(self.user):
             self.redirect("/" + post_id)
         else:
-            error = "Make sure to there's text in the comment field!"
-            self.render_submit(content, error,
-                               username=self.check_login(self.user))
+            content = self.request.get("content")
+
+            if content:
+                comment.comment = content
+                comment.put()
+                self.redirect("/" + post_id)
+            else:
+                error = "Make sure to there's text in the comment field!"
+                self.render_submit(content, error,
+                                   username=self.check_login(self.user))
 
 
 # Delete a page
@@ -320,8 +339,12 @@ class DeletePage(Handler):
 
     def post(self, post_id):
         post = Blog.by_id(int(post_id))
-        post.key.delete()
-        self.redirect("/profile")
+
+        if post.author != self.check_login(self.user):
+            self.redirect("/" + post_id)
+        else:
+            post.key.delete()
+            self.redirect("/profile")
 
 
 # Delete a comment
@@ -343,5 +366,8 @@ class DeleteComment(Handler):
         post = Blog.by_id(int(post_id))
         comment = Comment.get_by_id(int(comment_id), parent=post.key)
 
-        comment.key.delete()
-        self.redirect("/profile")
+        if comment.user != self.check_login(self.user):
+            self.redirect("/" + post_id)
+        else:
+            comment.key.delete()
+            self.redirect("/profile")
