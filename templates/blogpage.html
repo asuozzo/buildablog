@@ -5,40 +5,43 @@
         <div class="postbody">
             {{post.render() | safe}}
         </div>
-        <div>
-            <form method="post" class="entry-form">
+        {% if post.author != username %}
+            <form method="post" action="{{post.key.integer_id()}}/like" class="entry-form">
                 <div class="form-group">
-                    {% if post.author != username %}
-                        {% if not userliked %}
-                        <button type="submit" name="submit" class="btn btn-primary" value="like">Like this post</button>
-                        {% else %}
-                        <button type="submit" name="submit" class="btn btn-primary" value="unlike">Unlike this post</button>
-                        {% endif %}
+                    {% if not userliked %}
+                    <button type="submit" name="submit" class="btn btn-primary" value="like">Like this post</button>
                     {% else %}
-                        <a href="{{post.key.integer_id()}}/edit">Edit post</a> | <a href="{{post.key.integer_id()}}/delete">Delete post</a>
+                    <button type="submit" name="submit" class="btn btn-primary" value="unlike">Unlike this post</button>
                     {% endif %}
                 </div>
             </form>
-                <h4>Comments</h4>
-                <div>
-                    {% for c in comments %}
-                        <div class="comment well">
-                          <div class="comment-content">
-                            {{c.comment | safe}}
-                          </div>
-                          <div class="comment-info">
-                            posted by {{c.user}} on {{c.created.strftime("%b %d, %Y")}}
-                          </div>
-                        {% if c.user == username %}
-                        <div class="edit-comment">
-                            <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/edit">Edit</a> | <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/delete">Delete</a>
-                        </div>
-                        {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
+        {% else %}
+        <form method="post" class="entry-form">
+            <div class="form-group">
+                <a href="{{post.key.integer_id()}}/edit">Edit post</a> | <a href="{{post.key.integer_id()}}/delete">Delete post</a>
+            </div>
+        </form>
+        {% endif %}
+        <h4>Comments</h4>
+            <div>
+                {% for c in comments %}
+                    <div class="comment well">
+                      <div class="comment-content">
+                        {{c.comment | safe}}
+                      </div>
+                      <div class="comment-info">
+                        posted by {{c.user}} on {{c.created.strftime("%b %d, %Y")}}
+                      </div>
+                    {% if c.user == username %}
+                    <div class="edit-comment">
+                        <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/edit">Edit</a> | <a href="{{post.key.integer_id()}}/comment/{{c.key.integer_id()}}/delete">Delete</a>
+                    </div>
+                    {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
 
-            <form method="post" class="entry-form">
+            <form method="post" action="{{post.key.integer_id()}}/comment" class="entry-form">
                 <div class="form-group">
 
                     <textarea name="comment" class="form-control">{{comment}}</textarea>

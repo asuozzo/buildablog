@@ -10,9 +10,9 @@
         </div>
         <div class="profile-body">
             {% for b in blogs %}
-            <h4><a href="/{{b.key.integer_id()}}">{{b.subject}}</a></h4>
+            <h4><a href="/post/{{b.key.integer_id()}}">{{b.subject}}</a></h4>
             <div class="profile-post">{{b.content | truncate(300) }}</div>
-            <a href="/{{b.key.integer_id()}}/edit">Edit</a> | <a href="/{{b.key.integer_id()}}/delete">Delete</a>
+            <a href="/post/{{b.key.integer_id()}}/edit">Edit</a> | <a href="/post/{{b.key.integer_id()}}/delete">Delete</a>
             <hr>
             {% endfor %}
         </div>
@@ -26,7 +26,7 @@
         <div class="profile-body">
             {% for c in comments %}
             <div class="comment">"{{c.comment | truncate(300) }}"</div>
-            <div class="post-info">on post <a href="/{{c.bloglink}}">{{c.blogtitle}}</a></div>
+            <div class="post-info">on post <a href="/post/{{c.bloglink}}">{{c.blogtitle}}</a></div>
             <hr>
             {% endfor %}
         </div>
@@ -38,7 +38,7 @@
         </div>
         <div class="profile-body">
             {% for l in likes %}
-            <div><a href="/{{l.bloglink}}">{{l.blogtitle}}</a></div>
+            <div><a href="/post/{{l.bloglink}}">{{l.blogtitle}}</a></div>
             {% endfor %}
         </div>
     </div>

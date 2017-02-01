@@ -5,7 +5,7 @@
     <div class="col-xs-12 col-md-6 col-md-offset-3">
         <div class="post-heading">
             <div class="post-title">
-                <a href="/{{p.key.integer_id()}}">{{p.subject}}</a>
+                <a href="/post/{{p.key.integer_id()}}">{{p.subject}}</a>
             </div>
             <div class="post-social">
               <i class="fa fa-thumbs-up" aria-hidden="true"></i> {{p.likecount}}&nbsp;&nbsp;&nbsp;<i class="fa fa-comments" aria-hidden="true"></i> {{p.commentcount}}
@@ -18,7 +18,7 @@
             {{p.content | truncate(300) }}
         </div>
         <div class="link">
-            <a href="/{{p.key.integer_id()}}">read full post</a>
+            <a href="/post/{{p.key.integer_id()}}">read full post</a>
         </div>
         <hr>
     </div>

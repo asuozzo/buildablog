@@ -17,7 +17,27 @@ class Blog(ndb.Model):
 
     @classmethod
     def by_id(cls, blogid):
-        return Blog.get_by_id(blogid)
+        return Blog.get_by_id(int(blogid))
+
+
+def check_valid_post(f):
+    # @wraps(f)
+    def wrapper(self, post_id):
+        key = ndb.Key(Blog, int(post_id))
+        post = key.get()
+
+        if post:
+            return f(self, post_id)
+        else:
+            self.redirect("/404")
+            return
+    return wrapper
+
+
+def user_owns_post(f):
+    def wrapper(self, post_id):
+        key = Blog.by_id(post_id)
+
 
 
 def users_key(group='default'):
@@ -53,6 +73,30 @@ class User(ndb.Model):
             return u
 
 
+def user_logged_in(f):
+    def wrapper(self):
+        if self.user:
+            self.redirect("/")
+        else:
+            return f(self)
+    return wrapper
+
+
+def check_valid_user(f):
+    def wrapper(self):
+        if self.user:
+            user = User.by_name(self.user.username)
+            if user:
+                return f(self)
+            else:
+                self.redirect("/login")
+                return
+        else:
+            self.redirect("/login")
+            return
+    return wrapper
+
+
 class Comment(ndb.Model):
     blog = ndb.KeyProperty(kind=Blog)
     blogtitle = ndb.StringProperty()
@@ -64,6 +108,20 @@ class Comment(ndb.Model):
     def render(self):
         self._render_text = self.comment.replace('\n', '<br>')
         return render_str("comment.html", c=self)
+
+
+def check_valid_comment(f):
+    def wrapper(self, post_id, comment_id):
+        post = Blog.by_id(post_id).key
+        key = ndb.Key(Comment, int(comment_id), parent=post)
+        comment = key.get()
+
+        if comment:
+            return f(self, post_id, comment_id)
+        else:
+            self.redirect("/404")
+            return
+    return wrapper
 
 
 class Like(ndb.Model):
