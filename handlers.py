@@ -373,6 +373,7 @@ class NotFoundPage(Handler):
     def get(self):
         self.render("404.html", username=self.user.username)
 
+
 class LikeHandler(Handler):
     def post(self, post_id):
         user = self.user.username
@@ -389,6 +390,7 @@ class LikeHandler(Handler):
                 l.put()
 
         self.redirect("/post/"+post_id)
+
 
 class CommentHandler(Handler):
     def post(self, post_id):

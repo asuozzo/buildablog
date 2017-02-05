@@ -39,7 +39,6 @@ def user_owns_post(f):
         key = Blog.by_id(post_id)
 
 
-
 def users_key(group='default'):
     return ndb.Key("users", group)
 
