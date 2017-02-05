@@ -121,29 +121,29 @@ class PermalinkPage(Handler):
 
         if not self.check_login(self.user):
             self.redirect("/login")
-        else:
-            # Check which button the user pressed
-            if button == "comment":
-                comment = self.request.get("comment")
+        # else:
+        #     # Check which button the user pressed
+        #     if button == "comment":
+        #         comment = self.request.get("comment")
 
-                if comment == "":
-                    error = "There's no comment there!"
-                    self.render("blogpage.html", post=blog,
-                                username=self.check_login(self.user),
-                                error=error)
-                else:
-                    user = self.user.username
-                    blogtitle = blog.subject
-                    bloglink = int(post_id)
-                    c = Comment(parent=blog.key, blog=blog.key, user=user,
-                                comment=comment, blogtitle=blogtitle,
-                                bloglink=bloglink)
-                    c.put()
+        #         if comment == "":
+        #             error = "There's no comment there!"
+        #             self.render("blogpage.html", post=blog,
+        #                         username=self.check_login(self.user),
+        #                         error=error)
+        #         else:
+        #             user = self.user.username
+        #             blogtitle = blog.subject
+        #             bloglink = int(post_id)
+        #             c = Comment(parent=blog.key, blog=blog.key, user=user,
+        #                         comment=comment, blogtitle=blogtitle,
+        #                         bloglink=bloglink)
+        #             c.put()
 
-            # Add revised comment/like count to the related blog entity
-            blog.commentcount = Comment.query(ancestor=blog.key).count()
-            blog.likecount = Like.query(ancestor=blog.key).count()
-            blog.put()
+        #     # Add revised comment/like count to the related blog entity
+        #     blog.commentcount = Comment.query(ancestor=blog.key).count()
+        #     blog.likecount = Like.query(ancestor=blog.key).count()
+        #     blog.put()
 
         self.render_post(int(post_id))
 
@@ -375,11 +375,13 @@ class NotFoundPage(Handler):
 
 
 class LikeHandler(Handler):
+    @check_valid_post
     def post(self, post_id):
         user = self.user.username
         post = Blog.by_id(post_id)
         if post.author != user:
-            like = Like.gql("WHERE user = :1 AND blog = :2 LIMIT 1", user, post.key).get()
+            like = Like.gql("WHERE user = :1 AND blog = :2 LIMIT 1",
+                            user, post.key).get()
             if like:
                 like.key.delete()
             else:
@@ -393,5 +395,28 @@ class LikeHandler(Handler):
 
 
 class CommentHandler(Handler):
+    @check_valid_post
     def post(self, post_id):
-        pass
+        blog = Blog.by_id(post_id)
+        comment = self.request.get("comment")
+
+        if comment == "":
+            error = "There's no comment there!"
+            self.render("blogpage.html", post=blog,
+                        username=self.check_login(self.user),
+                        error=error)
+        else:
+            user = self.user.username
+            blogtitle = blog.subject
+            bloglink = int(post_id)
+            c = Comment(parent=blog.key, blog=blog.key, user=user,
+                        comment=comment, blogtitle=blogtitle,
+                        bloglink=bloglink)
+            c.put()
+
+        # Add revised comment/like count to the related blog entity
+        blog.commentcount = Comment.query(ancestor=blog.key).count()
+        blog.likecount = Like.query(ancestor=blog.key).count()
+        blog.put()
+
+        self.redirect("/post/" + post_id)
