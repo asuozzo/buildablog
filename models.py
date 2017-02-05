@@ -82,11 +82,11 @@ def user_logged_in(f):
 
 
 def check_valid_user(f):
-    def wrapper(self):
+    def wrapper(self, *args):
         if self.user:
             user = User.by_name(self.user.username)
             if user:
-                return f(self)
+                return f(self, *args)
             else:
                 self.redirect("/login")
                 return
